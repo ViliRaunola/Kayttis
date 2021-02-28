@@ -11,7 +11,7 @@ struct node {
 
 struct node* read_file(char *file_name, struct node *start_node);
 struct node* new_node(struct node *last_node, char *read_line);
-struct node* backtrack_to_front_and_connect_next_node(struct node* last_node);
+struct node* backtrack_to_front(struct node* last_node);
 struct node* free_linked_list(struct node *start_node);
 void print_linked_list(struct node *start_node);
 
@@ -30,8 +30,7 @@ int main(int argc, char *argv[]){
     return(0);
 }
 
-
-//opens the file that user gave 
+//opens the file that user gave and reads every line to a double linked list
 struct node* read_file(char *file_name, struct node *start_node){
     char *line = NULL;
     size_t n = 0;
@@ -54,8 +53,7 @@ struct node* read_file(char *file_name, struct node *start_node){
     }
     free(line);
     fclose(f);
-
-    return(start_node = backtrack_to_front_and_connect_next_node(prev_node));
+    return(start_node = backtrack_to_front(prev_node));
 }
 
 //creates a new struct for the linked list and connects it to the previous node in the linked list
@@ -75,6 +73,7 @@ struct node* new_node(struct node *last_node, char *read_line){
         strcpy(ptr_new_node->line, read_line);
         ptr_new_node->next_node = NULL;
         ptr_new_node->previous_node = last_node;
+        last_node->next_node = ptr_new_node;
     }else{
         ptr_new_node->line = malloc(strlen(read_line)+1);
         if((ptr_new_node->line) == NULL){
@@ -89,12 +88,11 @@ struct node* new_node(struct node *last_node, char *read_line){
 }
 
 //iterates through the linked list from the back to the front
-struct node* backtrack_to_front_and_connect_next_node(struct node* last_node){
+struct node* backtrack_to_front(struct node* last_node){
     struct node *temp;
     while((last_node->previous_node) != NULL){
         temp = last_node;
         last_node = temp->previous_node;
-        last_node->next_node = temp;
     }
     return last_node;
 }
