@@ -13,17 +13,23 @@ struct node* read_file(char *file_name, struct node *start_node);
 struct node* new_node(struct node *last_node, char *read_line);
 struct node* backtrack_to_front(struct node* last_node);
 struct node* free_linked_list(struct node *start_node);
-void print_linked_list(struct node *start_node);
+void print_linked_list_front_to_back(struct node *start_node);
+void go_end_of_list_and_print(struct node* start_node);
 
 int main(int argc, char *argv[]){
     struct node *start_node = NULL;
     char input[] = "input.txt";
+
+    
     
     fprintf(stdout, "You gave this many variables: %d.\n", argc);
     fprintf(stdout, "The second variable was: %s\n", argv[1]);
 	start_node = read_file(input, start_node);
     fprintf(stdout, "Now printing the linked list:\n\n");
-    print_linked_list(start_node);
+    print_linked_list_front_to_back(start_node);
+
+    fprintf(stdout, "Reversing the linked list.\n");
+    go_end_of_list_and_print(start_node);
 
     start_node = free_linked_list(start_node);
     fprintf(stdout, "Thank you for using this program!\n");
@@ -110,10 +116,23 @@ struct node* free_linked_list(struct node *start_node){
     return start_node;
 }
 
-void print_linked_list(struct node *start_node){
+void print_linked_list_front_to_back(struct node *start_node){
     while(start_node != NULL){
         fprintf(stdout, "%s", start_node->line);
         start_node = start_node->next_node;
+    }
+}
+
+//iterates to the last node of the linked and goes back to the beginning while printing each nodes' line
+void go_end_of_list_and_print(struct node* start_node){
+    struct node *temp;
+    while((start_node->next_node) != NULL){
+        temp = start_node;
+        start_node = temp->next_node;
+    }
+    while(start_node != NULL){
+        fprintf(stdout, "%s", start_node->line);
+        start_node = start_node->previous_node;
     }
 }
 
