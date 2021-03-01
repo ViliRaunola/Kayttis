@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <libgen.h>
 
 //struct for the linked list
 struct node {
@@ -21,47 +22,50 @@ void write_linked_to_file(struct node* start_node, char *file_name);
 int main(int argc, char *argv[]){
     struct node *start_node = NULL;
     //char input[] = "input.txt";
+    char *file_name_1;
+    char *file_name_2;
+    char *copy1;
+    char *copy2;
 
     if (argc >= 4){
-        fprintf(stdout, "usage: reverse <input> <output>\n");
-        exit(1);
-    }else if (strcmp(argv[1], argv[2]) != 0){
-        fprintf(stdout, "Input and output file must differ\n");
+        fprintf(stderr, "usage: reverse <input> <output>\n");
         exit(1);
     }else if (argc == 3){
-        start_node = read_file(argv[1], start_node);
-        write_linked_to_file(start_node, argv[2]);
-        start_node = free_linked_list(start_node);
-        fprintf(stdout, "Thank you for using this program!\n");
-        return(0);
+        //get only the file name from the input so that the path doesn't get compared 
+        //lähde vain tiedostonimen etsimiseen: https://www.systutorials.com/how-to-get-the-directory-path-and-file-name-from-a-absolute-path-in-c-on-linux/ [Viitattu 01/03/2021]
+        copy1 = strdup(argv[1]);
+        copy2 = strdup(argv[2]);
+        file_name_1 = basename(copy1);
+        file_name_2 = basename(copy2);
+
+        if(strcmp(file_name_1, file_name_2) == 0){
+            fprintf(stderr, "reverse: input and output file must differ\n"); //instructions and tests error messages differ...
+            exit(1);
+        }else{
+            start_node = read_file(argv[1], start_node);
+            write_linked_to_file(start_node, argv[2]);
+            start_node = free_linked_list(start_node);
+            //fprintf(stdout, "Thank you for using this program!\n");
+            return(0);
+        }
     }else if(argc == 2){
         start_node = read_file(argv[1], start_node);
         go_end_of_list_and_print(start_node);
         start_node = free_linked_list(start_node);
-        fprintf(stdout, "Thank you for using this program!\n");
+        //fprintf(stdout, "\nThank you for using this program!\n");
         return(0);
     }else{
         start_node = read_from_user(start_node);
         go_end_of_list_and_print(start_node);
         start_node = free_linked_list(start_node);
-        fprintf(stdout, "Thank you for using this program!\n");
+        //fprintf(stdout, "\nThank you for using this program!\n");
         return(0);
     }
     
-/*
-    fprintf(stdout, "You gave this many variables: %d.\n", argc);
-    fprintf(stdout, "The second variable was: %s\n", argv[1]);
-	start_node = read_file(input, start_node);
-    fprintf(stdout, "Now printing the linked list:\n\n");
-    print_linked_list_front_to_back(start_node);
 
-    go_end_of_list_and_print(start_node);
-
-    start_node = free_linked_list(start_node);
-    fprintf(stdout, "Thank you for using this program!\n");
-    return(0);
-*/
 }
+
+
 
 //opens the file that user gave and reads every line to a double linked list
 struct node* read_file(char *file_name, struct node *start_node){
@@ -71,7 +75,7 @@ struct node* read_file(char *file_name, struct node *start_node){
     struct node *prev_node = start_node;
     FILE *f = fopen(file_name, "r");
     if(f == NULL){
-        fprintf(stderr, "error: cannot open file '%s'\n", file_name);
+        fprintf(stderr, "reverse: cannot open file '%s'\n", file_name);  //in the instructions and test cases error messages differs...
         exit(1);
     }
     //getline() automatically updates the size of 'line' and 'n' to
@@ -79,7 +83,7 @@ struct node* read_file(char *file_name, struct node *start_node){
     //returns -1 when exiting.
     //Source: man getline
     while(getline(&line, &n, f) != -1){ 
-        fprintf(stdout, "%s", line);
+        //fprintf(stdout, "%s", line);
         temp_node = new_node(prev_node, line);  //when the loop is done prev_node has the address of the last node in the linked list
         prev_node = temp_node;
     }
@@ -91,16 +95,19 @@ struct node* read_file(char *file_name, struct node *start_node){
 struct node* read_from_user(struct node *start_node){
     char *input = NULL;
     size_t n = 0;
+    int nread; //TODO: tarkista ssize_t
     struct node *temp_node;
     struct node *prev_node = start_node;
-    fprintf(stdout, "Give an input to reverse (type ### to stop the input):\n");
+    char *end = "STOP!!\n";
+    fprintf(stdout, "Give an input to reverse (type STOP!! to stop the input):\n");
     do{
-        if(getline(&input, &n, stdin) == -1){
+        nread = getline(&input, &n, stdin);
+        if(nread == -1){
             fprintf(stderr, "getline failed");
             free(input);
             exit(1);
         }
-        if(strcmp(input, "###")){
+        if(strcmp(input, end) == 0){
             break;
         }else{
             temp_node = new_node(prev_node, input); //when the loop is done prev_node has the address of the last node in the linked list
@@ -179,6 +186,7 @@ void go_end_of_list_and_print(struct node* start_node){
         temp = start_node;
         start_node = temp->next_node;
     }
+    fprintf(stdout, "\nPrinting now the input in reverse:\n");
     while(start_node != NULL){
         fprintf(stdout, "%s", start_node->line);
         start_node = start_node->previous_node;
