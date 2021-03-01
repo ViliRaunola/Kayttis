@@ -4,6 +4,8 @@
 #include <string.h>
 #include <libgen.h>
 
+//TODO: HUOM!: virhe viestit kusee, koska testeissä eri kuin tehtävänannossa, testeissä ei huomioitu mitään tulsoteita, mitkä helpottavat ohjelman käyttöä, siksi ovat kommentoituna pois atm
+
 //struct for the linked list
 struct node {
     char *line;
@@ -40,11 +42,15 @@ int main(int argc, char *argv[]){
 
         if(strcmp(file_name_1, file_name_2) == 0){
             fprintf(stderr, "reverse: input and output file must differ\n"); //instructions and tests error messages differ...
+            free(copy1);
+            free(copy2);
             exit(1);
         }else{
             start_node = read_file(argv[1], start_node);
             write_linked_to_file(start_node, argv[2]);
             start_node = free_linked_list(start_node);
+            free(copy1);
+            free(copy2);
             //fprintf(stdout, "Thank you for using this program!\n");
             return(0);
         }
@@ -95,25 +101,18 @@ struct node* read_file(char *file_name, struct node *start_node){
 struct node* read_from_user(struct node *start_node){
     char *input = NULL;
     size_t n = 0;
-    int nread; //TODO: tarkista ssize_t
     struct node *temp_node;
     struct node *prev_node = start_node;
     char *end = "STOP!!\n";
-    fprintf(stdout, "Give an input to reverse (type STOP!! to stop the input):\n");
-    do{
-        nread = getline(&input, &n, stdin);
-        if(nread == -1){
-            fprintf(stderr, "getline failed");
-            free(input);
-            exit(1);
-        }
+    //fprintf(stdout, "Give an input to reverse (press ctrl + d to stop the input):\n"); //Lähde eof antamiseen terminaalin kautta: https://stackoverflow.com/questions/11968558/how-to-enter-the-value-of-eof-in-the-terminal [Viitattu 01/03/2021]
+    while (getline(&input, &n, stdin) != -1){
         if(strcmp(input, end) == 0){
             break;
         }else{
             temp_node = new_node(prev_node, input); //when the loop is done prev_node has the address of the last node in the linked list
             prev_node = temp_node;
         }
-    }while (1);
+    }
     free(input);
     return(start_node = backtrack_to_front(prev_node));
 }
@@ -186,7 +185,7 @@ void go_end_of_list_and_print(struct node* start_node){
         temp = start_node;
         start_node = temp->next_node;
     }
-    fprintf(stdout, "\nPrinting now the input in reverse:\n");
+    //fprintf(stdout, "\nPrinting now the input in reverse:\n");
     while(start_node != NULL){
         fprintf(stdout, "%s", start_node->line);
         start_node = start_node->previous_node;
