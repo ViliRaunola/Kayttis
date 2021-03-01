@@ -104,7 +104,7 @@ struct node* read_from_user(struct node *start_node){
     struct node *temp_node;
     struct node *prev_node = start_node;
     char *end = "STOP!!\n";
-    //fprintf(stdout, "Give an input to reverse (press ctrl + d to stop the input):\n"); //Lähde eof antamiseen terminaalin kautta: https://stackoverflow.com/questions/11968558/how-to-enter-the-value-of-eof-in-the-terminal [Viitattu 01/03/2021]
+    //fprintf(stdout, "Give an input to reverse (to stop: press ctrl + d [linux/unix] or ctrl + z [windows]):\n"); //Lähde eof antamiseen terminaalin kautta: https://stackoverflow.com/questions/11968558/how-to-enter-the-value-of-eof-in-the-terminal [Viitattu 01/03/2021]
     while (getline(&input, &n, stdin) != -1){
         if(strcmp(input, end) == 0){
             break;
